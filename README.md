@@ -1,6 +1,12 @@
 # Google Autocomplete API + React demo
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c691c99a-6521-4700-9e8b-785bf6930927/deploy-status)](https://app.netlify.com/sites/lucky-pithivier-700a33/deploys)
+
+[https://google-autocomplete-api-react-demo.netlify.app](https://google-autocomplete-api-react-demo.netlify.app)
+
 Demo project showing how to set up a React input component with autocomplete functionality using Google APIs.
+
+![Screenshot of live demo](docs/screenshot.png)
 
 Suggestions are shown as a plain list in this demo. Normally, you'll want to render them in a suggestions popover below the input.
 
