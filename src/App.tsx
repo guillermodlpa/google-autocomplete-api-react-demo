@@ -34,7 +34,7 @@ type GoogleApiClient = {
       AutocompleteService: {
         new (): {
           getPlacePredictions: (
-            params: { input: string; sessionToken?: string },
+            params: { input: string; sessionToken: string | undefined },
             callback: (
               predictions: Prediction[],
               status: PlacesServiceStatus
@@ -45,7 +45,11 @@ type GoogleApiClient = {
       PlacesService: {
         new (attributionNode: HTMLElement): {
           getDetails: (
-            params: { placeId: string; fields?: string[] },
+            params: {
+              placeId: string;
+              fields?: string[];
+              sessionToken: string | undefined;
+            },
             callback: (place: PlaceDetail, status: PlacesServiceStatus) => void
           ) => void;
         };
@@ -133,6 +137,9 @@ function App() {
 
     const google = await getGoogleMapsApiClient();
 
+    const sessionToken = sessionTokenRef.current;
+    sessionTokenRef.current = undefined;
+
     // @see https://developers.google.com/maps/documentation/javascript/places
     new google.maps.places.PlacesService(
       document.getElementById("googlemaps-attribution-container")!
@@ -146,6 +153,7 @@ function App() {
           "place_id",
           "geometry.location",
         ],
+        sessionToken,
       },
       (place: any, status: any) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
