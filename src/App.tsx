@@ -177,7 +177,25 @@ function App() {
       <header style={{ textAlign: "center" }}>
         <img src={logo} className="App-logo" alt="logo" />
 
-        <h1 style={{ fontSize: "2rem" }}>Google Maps API Autocomplete demo</h1>
+        <h1 style={{ fontSize: "2rem", margin: "1rem 0" }}>
+          Google Maps API Autocomplete demo
+        </h1>
+        <p
+          style={{
+            fontSize: "1rem",
+            textAlign: "center",
+            margin: "0 0 2rem 0",
+          }}
+        >
+          <a
+            href="https://github.com/guillermodlpa/google-autocomplete-api-react-demo"
+            style={{ color: "inherit" }}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Source code
+          </a>
+        </p>
       </header>
 
       <main style={{ maxWidth: "600px", margin: "0 auto" }}>
