@@ -10,7 +10,7 @@ Demo project showing how to set up a React input component with autocomplete fun
 
 Suggestions are shown as a plain list in this demo. Normally, you'll want to render them in a suggestions popover below the input.
 
-## Instrutions
+## Instructions
 
 * Set up a Google Cloud project
 * Enable the Maps JavaScript API and the Places API.
