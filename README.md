@@ -1,6 +1,8 @@
 # Google Autocomplete API + React demo
 
-This is a demo project showing how to set up an input with autocomplete functionality using Google APIs.
+Demo project showing how to set up a React input component with autocomplete functionality using Google APIs.
+
+Suggestions are shown as a plain list in this demo. Normally, you'll want to render them in a suggestions popover below the input.
 
 ## Instrutions
 
