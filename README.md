@@ -20,4 +20,4 @@ Run `npm install` and `npm run start` to kick it off locally.
 
 ## Attributions
 
-It was made with care starting from [Create React App.](https://github.com/facebook/create-react-app) Create React App is not dead!
+It was made with care starting from [Create React App.](https://github.com/facebook/create-react-app) Create React App [is not dead!](https://github.com/reactjs/reactjs.org/pull/5487#issuecomment-1409720741)
