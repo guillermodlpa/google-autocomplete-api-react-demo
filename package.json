@@ -1,5 +1,6 @@
 {
   "name": "google-autocomplete-api-react-demo",
+  "description": "Demo project showing how to set up a React input component with autocomplete functionality using Google APIs",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
