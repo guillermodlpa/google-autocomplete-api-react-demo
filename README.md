@@ -10,7 +10,7 @@ Demo project showing how to set up a React input component with autocomplete fun
 
 Suggestions are shown as a plain list in this demo. Normally, you'll want to render them in a suggestions popover below the input.
 
-➡️ For more info, out this step-by-step tutorial: [Simple guide to implementing a place/address autocomplete input with Google APIs and React](https://guillermodlpa.com/blog/guide-address-place-autocomplete-input-with-google-apis-and-react)
+➡️ For more info, check out this step-by-step tutorial: [Simple guide to implementing a place/address autocomplete input with Google APIs and React](https://guillermodlpa.com/blog/guide-address-place-autocomplete-input-with-google-apis-and-react)
 
 ## Instructions
 
