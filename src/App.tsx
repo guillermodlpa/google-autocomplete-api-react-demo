@@ -3,86 +3,27 @@ import { Loader } from "@googlemaps/js-api-loader";
 import logo from "./logo.svg";
 import "./App.css";
 
-type PlacesServiceStatus =
-  | "INVALID_REQUEST"
-  | "NOT_FOUND"
-  | "OK"
-  | "OVER_QUERY_LIMIT"
-  | "REQUEST_DENIED"
-  | "UNKNOWN_ERROR"
-  | "ZERO_RESULTS";
+let placesApiClient: google.maps.PlacesLibrary | undefined;
 
-export type Prediction = {
-  description: string;
-  place_id: string;
-};
-
-export type PlaceDetail = {
-  // fields here depend on the fields param passed to getDetails
-  formatted_address?: string;
-  geometry?: {
-    location: { lat: () => number; lng: () => number };
-  };
-  name?: string;
-  place_id?: string;
-};
-
-type GoogleApiClient = {
-  maps: {
-    places: {
-      AutocompleteSessionToken: { new (): string };
-      AutocompleteService: {
-        new (): {
-          getPlacePredictions: (
-            params: { input: string; sessionToken: string | undefined },
-            callback: (
-              predictions: Prediction[],
-              status: PlacesServiceStatus
-            ) => void
-          ) => void;
-        };
-      };
-      PlacesService: {
-        new (attributionNode: HTMLElement): {
-          getDetails: (
-            params: {
-              placeId: string;
-              fields?: string[];
-              sessionToken: string | undefined;
-            },
-            callback: (place: PlaceDetail, status: PlacesServiceStatus) => void
-          ) => void;
-        };
-      };
-      PlacesServiceStatus: {
-        [key in PlacesServiceStatus]: PlacesServiceStatus;
-      };
-    };
-    [key: string]: any;
-  };
-};
-
-let googleApiClient: GoogleApiClient | undefined;
-
-async function getGoogleMapsApiClient(): Promise<GoogleApiClient> {
-  if (googleApiClient) {
-    return googleApiClient;
+async function getGoogleMapsPlacesApiClient(): Promise<google.maps.PlacesLibrary> {
+  if (placesApiClient) {
+    return placesApiClient;
   }
   const loader = new Loader({
     apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_API_TOKEN || "",
     version: "weekly",
-    libraries: ["places"],
   });
-  googleApiClient = (await loader.load()) as GoogleApiClient;
-  return googleApiClient;
+  placesApiClient = await loader.importLibrary("places");
+  return placesApiClient;
 }
 
 function App() {
   const [value, setValue] = useState("");
+  const [fetching, setFetching] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [placeDetail, setPlaceDetail] = useState<any>();
 
-  const sessionTokenRef = useRef<string>();
+  const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken>();
 
   const timeoutRef = useRef<NodeJS.Timeout>();
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,29 +40,28 @@ function App() {
     }
 
     timeoutRef.current = setTimeout(async () => {
-      const google = await getGoogleMapsApiClient();
+      const places = await getGoogleMapsPlacesApiClient();
 
       if (!sessionTokenRef.current) {
         sessionTokenRef.current =
           new google.maps.places.AutocompleteSessionToken();
       }
 
+      setFetching(true);
       // @see https://developers.google.com/maps/documentation/javascript/place-autocomplete
-      new google.maps.places.AutocompleteService().getPlacePredictions(
+      new places.AutocompleteService().getPlacePredictions(
         {
           input: newValue,
           sessionToken: sessionTokenRef.current,
         },
         (predictions: any, status: any) => {
           console.log(predictions, status);
-          if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+          setFetching(false);
+          if (status === places.PlacesServiceStatus.ZERO_RESULTS) {
             setSuggestions([]);
             return;
           }
-          if (
-            status !== google.maps.places.PlacesServiceStatus.OK ||
-            !predictions
-          ) {
+          if (status !== places.PlacesServiceStatus.OK || !predictions) {
             alert(status);
             return;
           }
@@ -135,14 +75,16 @@ function App() {
     setValue(suggestion.description);
     setSuggestions([]);
 
-    const google = await getGoogleMapsApiClient();
+    const places = await getGoogleMapsPlacesApiClient();
 
     const sessionToken = sessionTokenRef.current;
     sessionTokenRef.current = undefined;
 
     // @see https://developers.google.com/maps/documentation/javascript/places
-    new google.maps.places.PlacesService(
-      document.getElementById("googlemaps-attribution-container")!
+    new places.PlacesService(
+      document.getElementById(
+        "googlemaps-attribution-container"
+      ) as HTMLDivElement
     ).getDetails(
       {
         placeId: suggestion.place_id,
@@ -180,45 +122,66 @@ function App() {
         <h1 style={{ fontSize: "2rem", margin: "1rem 0" }}>
           Google Maps API Autocomplete demo
         </h1>
-        <p
+
+        <ul
+          aria-label="Related links"
           style={{
-            fontSize: "1rem",
-            textAlign: "center",
+            listStyleType: "none",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "2rem",
+            justifyContent: "center",
             margin: "0 0 2rem 0",
+            padding: "0",
+            textAlign: "center",
           }}
         >
-          <a
-            href="https://github.com/guillermodlpa/google-autocomplete-api-react-demo"
-            style={{ color: "inherit" }}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Source code
-          </a>
-        </p>
+          <li>
+            <a
+              href="https://github.com/guillermodlpa/google-autocomplete-api-react-demo"
+              style={{ color: "inherit" }}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Source code
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://guillermodlpa.com"
+              style={{ color: "inherit" }}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Author's site
+            </a>
+          </li>
+        </ul>
       </header>
 
       <main style={{ maxWidth: "600px", margin: "0 auto" }}>
         <h2 style={{ fontSize: "1.25rem", textAlign: "left" }}>Description:</h2>
 
-        <ul>
-          <li>
-            Using Google Clouds APIs <strong>Maps JavaScript API</strong> and{" "}
-            <strong>Places API</strong>
-          </li>
-          <li>
-            First, a request is made to get autocomplete results when typing on
-            the input
-          </li>
-          <li>
-            Second, when a suggestion is selected, a request is made to obtain
-            the place details
-          </li>
-        </ul>
-
-        <p style={{ fontSize: "1rem" }}>
-          Enter at least 4 characters to load suggestions
+        <p>
+          Using Google Clouds APIs <strong>Maps JavaScript API</strong> and{" "}
+          <strong>Places API</strong>.
         </p>
+
+        <ol>
+          <li>
+            A request is made to get autocomplete results when typing on the
+            input.
+          </li>
+          <li>
+            When a suggestion is selected, a request is made to obtain the place
+            details.
+          </li>
+        </ol>
+
+        <label style={{ fontSize: "1rem" }} htmlFor="location-input">
+          Enter at least 4 characters to load suggestions:
+        </label>
 
         <input
           id="location-input"
@@ -232,6 +195,13 @@ function App() {
           onChange={handleChange}
           value={value}
         />
+
+        <p
+          aria-hidden={!fetching}
+          style={{ visibility: fetching ? "visible" : "hidden" }}
+        >
+          Fetching...
+        </p>
 
         {suggestions.length > 0 && (
           <div>
