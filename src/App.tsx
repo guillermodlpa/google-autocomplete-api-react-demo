@@ -19,7 +19,8 @@ async function getGoogleMapsPlacesApiClient(): Promise<google.maps.PlacesLibrary
 
 function App() {
   const [value, setValue] = useState("");
-  const [fetching, setFetching] = useState(false);
+  const [fetchingPredictions, setFetchingPredictions] = useState(false);
+  const [fetchingDetails, setFetchingDetails] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [placeDetail, setPlaceDetail] = useState<any>();
 
@@ -43,11 +44,10 @@ function App() {
       const places = await getGoogleMapsPlacesApiClient();
 
       if (!sessionTokenRef.current) {
-        sessionTokenRef.current =
-          new google.maps.places.AutocompleteSessionToken();
+        sessionTokenRef.current = new places.AutocompleteSessionToken();
       }
 
-      setFetching(true);
+      setFetchingPredictions(true);
       // @see https://developers.google.com/maps/documentation/javascript/place-autocomplete
       new places.AutocompleteService().getPlacePredictions(
         {
@@ -56,7 +56,7 @@ function App() {
         },
         (predictions: any, status: any) => {
           console.log(predictions, status);
-          setFetching(false);
+          setFetchingPredictions(false);
           if (status === places.PlacesServiceStatus.ZERO_RESULTS) {
             setSuggestions([]);
             return;
@@ -80,6 +80,8 @@ function App() {
     const sessionToken = sessionTokenRef.current;
     sessionTokenRef.current = undefined;
 
+    setFetchingDetails(true);
+
     // @see https://developers.google.com/maps/documentation/javascript/places
     new places.PlacesService(
       document.getElementById(
@@ -98,7 +100,8 @@ function App() {
         sessionToken,
       },
       (place: any, status: any) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
+        setFetchingDetails(false);
+        if (status === places.PlacesServiceStatus.OK) {
           setPlaceDetail(place);
         }
       }
@@ -196,12 +199,8 @@ function App() {
           value={value}
         />
 
-        <p
-          aria-hidden={!fetching}
-          style={{ visibility: fetching ? "visible" : "hidden" }}
-        >
-          Fetching...
-        </p>
+        {fetchingPredictions && <p>Fetching predictions...</p>}
+        {fetchingDetails && <p>Fetching details...</p>}
 
         {suggestions.length > 0 && (
           <div>
